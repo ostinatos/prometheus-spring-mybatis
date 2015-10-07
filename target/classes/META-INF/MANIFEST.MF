@@ -1,0 +1,9 @@
+Manifest-Version: 1.0
+Implementation-Title: Prometheus-spring-mybatis
+Implementation-Version: 0.0.1-SNAPSHOT
+Built-By: s00195348
+Implementation-Vendor-Id: mount.olympus
+Build-Jdk: 1.8.0_11
+Created-By: Maven Integration for Eclipse
+Implementation-Vendor: Pivotal Software, Inc.
+

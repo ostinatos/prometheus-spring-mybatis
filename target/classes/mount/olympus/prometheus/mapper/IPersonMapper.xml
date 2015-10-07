@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="mount.olympus.prometheus.mapper.IPersonMapper">
+	<select id="selectPerson" resultType="mount.olympus.prometheus.model.Person">
+		select * from person
+	</select>
+<!-- 
+	<insert id="insertPerson" parameterType="mount.olympus.prometheus.model.Person"
+		keyColumn="pid" keyProperty="pid">
+		<selectKey keyProperty="pid" resultType="long" order="BEFORE">
+		select person_s.nextval from dual
+		</selectKey>
+		insert into person(pid, name) values(#{pid, jdbcType=NUMERIC}, #{name, jdbcType=VARCHAR})
+	</insert>
+ -->	
+	<insert id="insertPerson" parameterType="mount.olympus.prometheus.model.Person"
+		keyColumn="pid" keyProperty="pid" useGeneratedKeys="true">
+		insert into person(pid, name) values(person_s.nextval, #{name, jdbcType=VARCHAR})
+	</insert>
+</mapper>
