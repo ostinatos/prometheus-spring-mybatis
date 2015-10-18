@@ -51,6 +51,7 @@ public class PersonBatchService implements IPersonService {
 		
 		for(Person p:pl){
 			mapper.insertPerson(p);
+			logger.debug("inserted Pid: " + p.getPid());
 			//sqlSessionForBatch.insert("mount.olympus.prometheus.mapper.IPersonMapper.insertPerson", p);
 			
 		}

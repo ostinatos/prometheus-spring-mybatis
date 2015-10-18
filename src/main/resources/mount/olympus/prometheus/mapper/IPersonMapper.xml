@@ -3,20 +3,110 @@
   PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
   "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="mount.olympus.prometheus.mapper.IPersonMapper">
-	<select id="selectPerson" resultType="mount.olympus.prometheus.model.Person">
-		select * from person
+
+	<!-- simple result map -->
+	<resultMap type="mount.olympus.prometheus.model.Person" id="simplePersonResultMap">
+		<id property="pid" column="pid" />
+		<result property="name" column="name" />
+	</resultMap>
+
+	<!-- person profile result map -->
+	<resultMap type="mount.olympus.prometheus.model.PersonProfile"
+		id="personProfileResultMap">
+		<id property="profileId" column="PROFILE_ID" />
+		<result property="nickName" column="NICKNAME" />
+		<result property="gender" column="GENDER" />
+		<result property="loc" column="LOC" />
+		<result property="intro" column="INTRO" />
+	</resultMap>
+
+	<!-- complex person result map -->
+	<resultMap type="mount.olympus.prometheus.model.Person" id="complexPersonResultMap">
+		<id property="pid" column="pid" />
+		<result property="name" column="name" />
+		<association property="personProfile" resultMap="personProfileResultMap"></association>
+		<collection property="addressList" javaType="ArrayList" column="pid" ofType="mount.olympus.prometheus.model.PersonAddress" select="selectAddressList"/>
+	</resultMap>
+
+	<!-- address result map -->
+	<resultMap type="mount.olympus.prometheus.model.PersonAddress"
+		id="addressResultMap">
+		<id property="addressId" column="ADDRESS_ID" />
+		<result property="addDesc" column="ADD_DESC" />
+		<result property="province" column="PROVINCE" />
+	</resultMap>
+
+	<!-- query mapper using resultType <select id="selectPerson" resultType="mount.olympus.prometheus.model.Person"> 
+		select * from person </select> -->
+
+	<!-- query mapper using resultMap <select id="selectPerson" resultMap="simplePersonResultMap"> 
+		select * from person </select> -->
+
+	<!-- query mapper for nested structure: person, person profile -->
+	<select id="selectPerson" resultMap="complexPersonResultMap">
+		select p.pid as pid,
+		p.name
+		as name,
+		pp.profile_id as profileid,
+		pp.nickname as nickname,
+		pp.gender
+		as gender,
+		pp.loc as loc,
+		pp.intro as intro
+		from person p, person_profile
+		pp
+		where p.pid = pp.pid
 	</select>
-<!-- 
+
+	<!-- query mapper for select address list of specific person -->
+	<select id="selectAddressList" resultMap="addressResultMap">
+		select * from person_address where pid = #{pid}
+	</select>
+
+	<!-- -->
 	<insert id="insertPerson" parameterType="mount.olympus.prometheus.model.Person"
 		keyColumn="pid" keyProperty="pid">
-		<selectKey keyProperty="pid" resultType="long" order="BEFORE">
-		select person_s.nextval from dual
+		<selectKey keyProperty="pid" resultType="long" order="BEFORE"> select
+			person_s.nextval from dual
 		</selectKey>
-		insert into person(pid, name) values(#{pid, jdbcType=NUMERIC}, #{name, jdbcType=VARCHAR})
+		insert into
+		person(pid, name) values(#{pid, jdbcType=NUMERIC}, #{name,
+		jdbcType=VARCHAR})
 	</insert>
- -->	
-	<insert id="insertPerson" parameterType="mount.olympus.prometheus.model.Person"
-		keyColumn="pid" keyProperty="pid" useGeneratedKeys="true">
-		insert into person(pid, name) values(person_s.nextval, #{name, jdbcType=VARCHAR})
+	<!-- not using seperate SQL to get sequence id <insert id="insertPerson" 
+		parameterType="mount.olympus.prometheus.model.Person" keyColumn="pid" keyProperty="pid" 
+		useGeneratedKeys="true"> insert into person(pid, name) values(person_s.nextval, 
+		#{name, jdbcType=VARCHAR}) </insert> -->
+
+	<insert id="insertPersonProfile" parameterType="mount.olympus.prometheus.model.Person">
+		insert into
+		person_profile(profile_id, pid, nickname, gender, loc, intro)
+		values(
+		person_s.nextval,
+		#{pid, jdbcType=NUMERIC},
+		#{personProfile.nickName,
+		jdbcType=VARCHAR},
+		#{personProfile.gender, jdbcType=VARCHAR},
+		#{personProfile.loc,
+		jdbcType=VARCHAR},
+		#{personProfile.intro,
+		jdbcType=VARCHAR})
 	</insert>
+
+	<insert id="insertPersonAddressList" parameterType="mount.olympus.prometheus.model.PersonAddress">
+		begin
+		<foreach collection="list" item="item">
+			insert into
+			person_address(address_id, pid, add_desc, province)
+			values(
+			person_s.nextval,
+			#{item.pid, jdbcType=NUMERIC},
+			#{item.addDesc,
+			jdbcType=VARCHAR},
+			#{item.province, jdbcType=VARCHAR}
+			);
+		</foreach>
+		end;
+	</insert>
+
 </mapper>
